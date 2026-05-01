@@ -1,0 +1,134 @@
+name = "python-slugify"
+description = "Slug-from-Unicode-text library — bug variants hand-crafted against modern HEAD, drawing from upstream history (un33k/python-slugify)."
+language = "python"
+crate = "python-slugify"
+base_commit = "7b6d5d96c1995e6dccb39a19a13ba78d7d0a3ee4"
+
+# ---------------------------------------------------------------------------
+# Variant: uppercase_pre_translations_a243ccdc_1
+# ---------------------------------------------------------------------------
+[[tasks]]
+mutations = ["uppercase_pre_translations_a243ccdc_1"]
+
+[tasks.source]
+repo = "https://github.com/un33k/python-slugify"
+commits = ["a243ccdc6d2b650b83782e03893e8f117356aeff"]
+commit_subjects = ["fix uppercase pre-translations (#148)"]
+prs = [148]
+origin = "internal"
+summary = "``add_uppercase_char`` walks a per-language replacement list and inserts the uppercase variant of every entry. Pre-fix the ``return char_list`` was indented one level too deep so the function returned after processing the first entry, leaving the bulk of the uppercase variants out of ``PRE_TRANSLATIONS``."
+
+[tasks.injection]
+kind = "patch"
+files = ["slugify/special.py"]
+locations = [{ file = "slugify/special.py", line = 7, symbol = "add_uppercase_char" }]
+patch = "patches/uppercase_pre_translations_a243ccdc_1.patch"
+
+[tasks.bug]
+short_name = "uppercase_pre_translations"
+invariant = "After ``add_uppercase_char(pairs)``, for every original ``(c, x)`` in ``pairs`` whose ``c.upper() != c``, the pair ``(c.upper(), x.capitalize())`` is in the result."
+how_triggered = "The mutation re-indents ``return char_list`` so it lives inside the ``for`` loop. The function returns after the first iteration and only the first entry's uppercase variant is inserted; subsequent entries are silently dropped."
+
+[[tasks.tasks]]
+property = "AddUppercaseCovers"
+crosshair_timeout = true
+witnesses = [
+  { test_fn = "witness_add_uppercase_covers_case_two_pairs", note = "two distinct lowercase letters; both uppercase variants must be present" },
+  { test_fn = "witness_add_uppercase_covers_case_cyrillic", note = "subset of CYRILLIC; checks 'я' and 'х' uppercase variants" },
+]
+
+# ---------------------------------------------------------------------------
+# Variant: stopwords_with_custom_separator_a1543fe0_1
+# ---------------------------------------------------------------------------
+[[tasks]]
+mutations = ["stopwords_with_custom_separator_a1543fe0_1"]
+
+[tasks.source]
+repo = "https://github.com/un33k/python-slugify"
+commits = ["a1543fe0ae019606bec660d6cf2e70a435ff29e4"]
+commit_subjects = ["fixed stopword replacement bug (different separators)"]
+origin = "internal"
+summary = "Stopword stripping happens after the text is already normalized to use ``DEFAULT_SEPARATOR`` (``-``). Pre-fix the code split and re-joined the text on the user-supplied ``separator`` instead of ``DEFAULT_SEPARATOR``; with any non-default separator the split misfired and stopwords were never removed."
+
+[tasks.injection]
+kind = "patch"
+files = ["slugify/slugify.py"]
+locations = [{ file = "slugify/slugify.py", line = 180, symbol = "slugify" }]
+patch = "patches/stopwords_with_custom_separator_a1543fe0_1.patch"
+
+[tasks.bug]
+short_name = "stopwords_with_custom_separator"
+invariant = "If a stopword appears as a whole token in the input and is included in ``stopwords=[...]``, ``slugify(text, stopwords=..., separator=sep)`` does not contain that stopword as a token in the result, regardless of ``sep``."
+how_triggered = "The mutation replaces ``DEFAULT_SEPARATOR`` with ``separator`` inside the stopword block. With ``separator != '-'`` the split returns the whole text as a single token (no '-' boundaries appear in the user-visible separator), so the stopword filter cannot match anything."
+
+[[tasks.tasks]]
+property = "StopwordsRespectSeparator"
+witnesses = [
+  { test_fn = "witness_stopwords_respect_separator_case_space", note = "stopword 'the' with separator=' ' must still be stripped" },
+  { test_fn = "witness_stopwords_respect_separator_case_underscore", note = "stopword 'a' with separator='_' must still be stripped" },
+]
+
+# ---------------------------------------------------------------------------
+# Variant: regex_pattern_cli_ignored_7edf477f_1
+# ---------------------------------------------------------------------------
+[[tasks]]
+mutations = ["regex_pattern_cli_ignored_7edf477f_1"]
+
+[tasks.source]
+repo = "https://github.com/un33k/python-slugify"
+commits = ["7edf477f64b65ffe22c966d6a8dcc3edd0fb6997"]
+commit_subjects = ["Fix --regex-pattern being ignored by the CLI"]
+prs = [175]
+origin = "internal"
+summary = "The ``--regex-pattern`` CLI flag was parsed by argparse but ``slugify_params()`` did not forward ``args.regex_pattern`` into the kwargs dict passed to ``slugify``. As a result, the option had no effect on the resulting slug when invoked from the command line."
+
+[tasks.injection]
+kind = "patch"
+files = ["slugify/__main__.py"]
+locations = [{ file = "slugify/__main__.py", line = 79, symbol = "slugify_params" }]
+patch = "patches/regex_pattern_cli_ignored_7edf477f_1.patch"
+
+[tasks.bug]
+short_name = "regex_pattern_cli_ignored"
+invariant = "After parsing ``--regex-pattern P`` from argv, ``slugify_params(args)['regex_pattern'] == P``: the CLI flag flows into the kwargs that drive ``slugify()``."
+how_triggered = "The mutation removes the ``regex_pattern=args.regex_pattern,`` line from ``slugify_params``. The CLI parser still accepts the flag but its value is never forwarded to ``slugify``."
+
+[[tasks.tasks]]
+property = "CliRegexPatternForwarded"
+witnesses = [
+  { test_fn = "witness_cli_regex_pattern_forwarded_case_basic", note = "--regex-pattern X must surface as kwargs['regex_pattern'] == 'X'" },
+  { test_fn = "witness_cli_regex_pattern_forwarded_case_underscore", note = "single-character pattern still forwarded" },
+]
+
+# ---------------------------------------------------------------------------
+# Variant: normalize_accents_twice_e52c35e3_1
+# ---------------------------------------------------------------------------
+[[tasks]]
+mutations = ["normalize_accents_twice_e52c35e3_1"]
+
+[tasks.source]
+repo = "https://github.com/un33k/python-slugify"
+commits = ["e52c35e34899bc21a389aa7f4fe5084423cf538c"]
+commit_subjects = ["Ci - Normalize accented text twice. (#143)"]
+prs = [143]
+origin = "internal"
+summary = "``slugify`` historically called ``unidecode()`` on the raw input. ``unidecode`` only handles single code points, so pre-composed presentation forms (mathematical italic / double-struck letters, e.g. U+1D41A ``𝐚`` or U+1D552 ``𝕒``) were dropped to the empty slug instead of folding to ``a``. The fix prepends a ``unicodedata.normalize('NFKD', text)`` (or ``'NFKC'`` when ``allow_unicode``) so the presentation forms decompose to their ASCII bases first."
+
+[tasks.injection]
+kind = "patch"
+files = ["slugify/slugify.py"]
+locations = [{ file = "slugify/slugify.py", line = 120, symbol = "slugify" }]
+patch = "patches/normalize_accents_twice_e52c35e3_1.patch"
+
+[tasks.bug]
+short_name = "normalize_accents_twice"
+invariant = "For each character ``c`` in input whose NFKD decomposition contains an ASCII letter ``L``, ``slugify(c)`` contains ``L`` (or its lowercase form). In particular, ``slugify('𝐚𝕒')`` is non-empty."
+how_triggered = "The mutation removes the pre-``unidecode`` ``NFKD``/``NFKC`` normalization pass. Pre-composed presentation forms reach ``unidecode`` undecomposed; ``unidecode`` returns the empty string for them, and they vanish from the output."
+
+[[tasks.tasks]]
+property = "NfkdPreNormalize"
+witnesses = [
+  { test_fn = "witness_nfkd_pre_normalize_case_math_italic", note = "U+1D41A 'mathematical bold a' must fold to 'a'" },
+  { test_fn = "witness_nfkd_pre_normalize_case_double_struck", note = "U+1D552 'double-struck a' must fold to 'a'" },
+  { test_fn = "witness_nfkd_pre_normalize_case_mixed", note = "mixed presentation forms + plain accented letters must all reach 'a'" },
+]
