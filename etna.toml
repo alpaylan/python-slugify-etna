@@ -1,6 +1,7 @@
 name = "python-slugify"
 description = "Slug-from-Unicode-text library — bug variants hand-crafted against modern HEAD, drawing from upstream history (un33k/python-slugify)."
 language = "python"
+strategies = ["hypothesis", "crosshair"]
 crate = "python-slugify"
 base_commit = "7b6d5d96c1995e6dccb39a19a13ba78d7d0a3ee4"
 
