@@ -2,23 +2,21 @@
 
 Slug-from-Unicode-text library — bug variants hand-crafted against modern HEAD, drawing from upstream history (un33k/python-slugify).
 
-Total mutations: 4
+Total mutations: 3
 
 ## Bug Index
 
 | # | Variant | Name | Location | Injection | Fix Commit |
 |---|---------|------|----------|-----------|------------|
 | 1 | `normalize_accents_twice_e52c35e3_1` | `normalize_accents_twice` | `slugify/slugify.py:120` | `patch` | `e52c35e34899bc21a389aa7f4fe5084423cf538c` |
-| 2 | `regex_pattern_cli_ignored_7edf477f_1` | `regex_pattern_cli_ignored` | `slugify/__main__.py:79` | `patch` | `7edf477f64b65ffe22c966d6a8dcc3edd0fb6997` |
-| 3 | `stopwords_with_custom_separator_a1543fe0_1` | `stopwords_with_custom_separator` | `slugify/slugify.py:180` | `patch` | `a1543fe0ae019606bec660d6cf2e70a435ff29e4` |
-| 4 | `uppercase_pre_translations_a243ccdc_1` | `uppercase_pre_translations` | `slugify/special.py:7` | `patch` | `a243ccdc6d2b650b83782e03893e8f117356aeff` |
+| 2 | `stopwords_with_custom_separator_a1543fe0_1` | `stopwords_with_custom_separator` | `slugify/slugify.py:180` | `patch` | `a1543fe0ae019606bec660d6cf2e70a435ff29e4` |
+| 3 | `uppercase_pre_translations_a243ccdc_1` | `uppercase_pre_translations` | `slugify/special.py:7` | `patch` | `a243ccdc6d2b650b83782e03893e8f117356aeff` |
 
 ## Property Mapping
 
 | Variant | Property | Witness(es) |
 |---------|----------|-------------|
 | `normalize_accents_twice_e52c35e3_1` | `NfkdPreNormalize` | `witness_nfkd_pre_normalize_case_math_italic`, `witness_nfkd_pre_normalize_case_double_struck`, `witness_nfkd_pre_normalize_case_mixed` |
-| `regex_pattern_cli_ignored_7edf477f_1` | `CliRegexPatternForwarded` | `witness_cli_regex_pattern_forwarded_case_basic`, `witness_cli_regex_pattern_forwarded_case_underscore` |
 | `stopwords_with_custom_separator_a1543fe0_1` | `StopwordsRespectSeparator` | `witness_stopwords_respect_separator_case_space`, `witness_stopwords_respect_separator_case_underscore` |
 | `uppercase_pre_translations_a243ccdc_1` | `AddUppercaseCovers` | `witness_add_uppercase_covers_case_two_pairs`, `witness_add_uppercase_covers_case_cyrillic` |
 
@@ -27,7 +25,6 @@ Total mutations: 4
 | Property | proptest | quickcheck | crabcheck | hegel |
 |----------|---------:|-----------:|----------:|------:|
 | `NfkdPreNormalize` | ✓ | ✓ | ✓ | ✓ |
-| `CliRegexPatternForwarded` | ✓ | ✓ | ✓ | ✓ |
 | `StopwordsRespectSeparator` | ✓ | ✓ | ✓ | ✓ |
 | `AddUppercaseCovers` | ✓ | ✓ | ✓ | ✓ |
 
@@ -48,21 +45,7 @@ Total mutations: 4
 - **Invariant violated**: For each character ``c`` in input whose NFKD decomposition contains an ASCII letter ``L``, ``slugify(c)`` contains ``L`` (or its lowercase form). In particular, ``slugify('𝐚𝕒')`` is non-empty.
 - **How the mutation triggers**: The mutation removes the pre-``unidecode`` ``NFKD``/``NFKC`` normalization pass. Pre-composed presentation forms reach ``unidecode`` undecomposed; ``unidecode`` returns the empty string for them, and they vanish from the output.
 
-### 2. regex_pattern_cli_ignored
-
-- **Variant**: `regex_pattern_cli_ignored_7edf477f_1`
-- **Location**: `slugify/__main__.py:79` (inside `slugify_params`)
-- **Property**: `CliRegexPatternForwarded`
-- **Witness(es)**:
-  - `witness_cli_regex_pattern_forwarded_case_basic` — --regex-pattern X must surface as kwargs['regex_pattern'] == 'X'
-  - `witness_cli_regex_pattern_forwarded_case_underscore` — single-character pattern still forwarded
-- **Source**: [#175](https://github.com/un33k/python-slugify/pull/175), internal — Fix --regex-pattern being ignored by the CLI
-  > The ``--regex-pattern`` CLI flag was parsed by argparse but ``slugify_params()`` did not forward ``args.regex_pattern`` into the kwargs dict passed to ``slugify``. As a result, the option had no effect on the resulting slug when invoked from the command line.
-- **Fix commit**: `7edf477f64b65ffe22c966d6a8dcc3edd0fb6997` — Fix --regex-pattern being ignored by the CLI
-- **Invariant violated**: After parsing ``--regex-pattern P`` from argv, ``slugify_params(args)['regex_pattern'] == P``: the CLI flag flows into the kwargs that drive ``slugify()``.
-- **How the mutation triggers**: The mutation removes the ``regex_pattern=args.regex_pattern,`` line from ``slugify_params``. The CLI parser still accepts the flag but its value is never forwarded to ``slugify``.
-
-### 3. stopwords_with_custom_separator
+### 2. stopwords_with_custom_separator
 
 - **Variant**: `stopwords_with_custom_separator_a1543fe0_1`
 - **Location**: `slugify/slugify.py:180` (inside `slugify`)
@@ -76,7 +59,7 @@ Total mutations: 4
 - **Invariant violated**: If a stopword appears as a whole token in the input and is included in ``stopwords=[...]``, ``slugify(text, stopwords=..., separator=sep)`` does not contain that stopword as a token in the result, regardless of ``sep``.
 - **How the mutation triggers**: The mutation replaces ``DEFAULT_SEPARATOR`` with ``separator`` inside the stopword block. With ``separator != '-'`` the split returns the whole text as a single token (no '-' boundaries appear in the user-visible separator), so the stopword filter cannot match anything.
 
-### 4. uppercase_pre_translations
+### 3. uppercase_pre_translations
 
 - **Variant**: `uppercase_pre_translations_a243ccdc_1`
 - **Location**: `slugify/special.py:7` (inside `add_uppercase_char`)

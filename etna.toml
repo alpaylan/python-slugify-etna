@@ -70,38 +70,6 @@ witnesses = [
 ]
 
 # ---------------------------------------------------------------------------
-# Variant: regex_pattern_cli_ignored_7edf477f_1
-# ---------------------------------------------------------------------------
-[[tasks]]
-mutations = ["regex_pattern_cli_ignored_7edf477f_1"]
-
-[tasks.source]
-repo = "https://github.com/un33k/python-slugify"
-commits = ["7edf477f64b65ffe22c966d6a8dcc3edd0fb6997"]
-commit_subjects = ["Fix --regex-pattern being ignored by the CLI"]
-prs = [175]
-origin = "internal"
-summary = "The ``--regex-pattern`` CLI flag was parsed by argparse but ``slugify_params()`` did not forward ``args.regex_pattern`` into the kwargs dict passed to ``slugify``. As a result, the option had no effect on the resulting slug when invoked from the command line."
-
-[tasks.injection]
-kind = "patch"
-files = ["slugify/__main__.py"]
-locations = [{ file = "slugify/__main__.py", line = 79, symbol = "slugify_params" }]
-patch = "patches/regex_pattern_cli_ignored_7edf477f_1.patch"
-
-[tasks.bug]
-short_name = "regex_pattern_cli_ignored"
-invariant = "After parsing ``--regex-pattern P`` from argv, ``slugify_params(args)['regex_pattern'] == P``: the CLI flag flows into the kwargs that drive ``slugify()``."
-how_triggered = "The mutation removes the ``regex_pattern=args.regex_pattern,`` line from ``slugify_params``. The CLI parser still accepts the flag but its value is never forwarded to ``slugify``."
-
-[[tasks.tasks]]
-property = "CliRegexPatternForwarded"
-witnesses = [
-  { test_fn = "witness_cli_regex_pattern_forwarded_case_basic", note = "--regex-pattern X must surface as kwargs['regex_pattern'] == 'X'" },
-  { test_fn = "witness_cli_regex_pattern_forwarded_case_underscore", note = "single-character pattern still forwarded" },
-]
-
-# ---------------------------------------------------------------------------
 # Variant: normalize_accents_twice_e52c35e3_1
 # ---------------------------------------------------------------------------
 [[tasks]]
