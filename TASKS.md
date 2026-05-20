@@ -1,23 +1,17 @@
 # python-slugify — ETNA Tasks
 
-Total tasks: 12
+Total tasks: 6
 
 ## Task Index
 
 | Task | Variant | Framework | Property | Witness |
 |------|---------|-----------|----------|---------|
-| 001 | `normalize_accents_twice_e52c35e3_1` | proptest | `NfkdPreNormalize` | `witness_nfkd_pre_normalize_case_math_italic` |
-| 002 | `normalize_accents_twice_e52c35e3_1` | quickcheck | `NfkdPreNormalize` | `witness_nfkd_pre_normalize_case_math_italic` |
-| 003 | `normalize_accents_twice_e52c35e3_1` | crabcheck | `NfkdPreNormalize` | `witness_nfkd_pre_normalize_case_math_italic` |
-| 004 | `normalize_accents_twice_e52c35e3_1` | hegel | `NfkdPreNormalize` | `witness_nfkd_pre_normalize_case_math_italic` |
-| 005 | `stopwords_with_custom_separator_a1543fe0_1` | proptest | `StopwordsRespectSeparator` | `witness_stopwords_respect_separator_case_space` |
-| 006 | `stopwords_with_custom_separator_a1543fe0_1` | quickcheck | `StopwordsRespectSeparator` | `witness_stopwords_respect_separator_case_space` |
-| 007 | `stopwords_with_custom_separator_a1543fe0_1` | crabcheck | `StopwordsRespectSeparator` | `witness_stopwords_respect_separator_case_space` |
-| 008 | `stopwords_with_custom_separator_a1543fe0_1` | hegel | `StopwordsRespectSeparator` | `witness_stopwords_respect_separator_case_space` |
-| 009 | `uppercase_pre_translations_a243ccdc_1` | proptest | `AddUppercaseCovers` | `witness_add_uppercase_covers_case_two_pairs` |
-| 010 | `uppercase_pre_translations_a243ccdc_1` | quickcheck | `AddUppercaseCovers` | `witness_add_uppercase_covers_case_two_pairs` |
-| 011 | `uppercase_pre_translations_a243ccdc_1` | crabcheck | `AddUppercaseCovers` | `witness_add_uppercase_covers_case_two_pairs` |
-| 012 | `uppercase_pre_translations_a243ccdc_1` | hegel | `AddUppercaseCovers` | `witness_add_uppercase_covers_case_two_pairs` |
+| 001 | `normalize_accents_twice_e52c35e3_1` | hypothesis | `NfkdPreNormalize` | `witness_nfkd_pre_normalize_case_math_italic` |
+| 002 | `normalize_accents_twice_e52c35e3_1` | crosshair | `NfkdPreNormalize` | `witness_nfkd_pre_normalize_case_math_italic` |
+| 003 | `stopwords_with_custom_separator_a1543fe0_1` | hypothesis | `StopwordsRespectSeparator` | `witness_stopwords_respect_separator_case_space` |
+| 004 | `stopwords_with_custom_separator_a1543fe0_1` | crosshair | `StopwordsRespectSeparator` | `witness_stopwords_respect_separator_case_space` |
+| 005 | `uppercase_pre_translations_a243ccdc_1` | hypothesis | `AddUppercaseCovers` | `witness_add_uppercase_covers_case_two_pairs` |
+| 006 | `uppercase_pre_translations_a243ccdc_1` | crosshair | `AddUppercaseCovers` | `witness_add_uppercase_covers_case_two_pairs` |
 
 ## Witness Catalog
 

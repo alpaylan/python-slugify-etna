@@ -22,11 +22,11 @@ Total mutations: 3
 
 ## Framework Coverage
 
-| Property | proptest | quickcheck | crabcheck | hegel |
-|----------|---------:|-----------:|----------:|------:|
-| `NfkdPreNormalize` | ✓ | ✓ | ✓ | ✓ |
-| `StopwordsRespectSeparator` | ✓ | ✓ | ✓ | ✓ |
-| `AddUppercaseCovers` | ✓ | ✓ | ✓ | ✓ |
+| Property | hypothesis | crosshair |
+|----------|---------:|--------:|
+| `NfkdPreNormalize` | ✓ | ✓ |
+| `StopwordsRespectSeparator` | ✓ | ✓ |
+| `AddUppercaseCovers` | ✓ | ✓ |
 
 ## Bug Details
 
